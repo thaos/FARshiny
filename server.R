@@ -87,7 +87,7 @@ shinyServer(function(input, output) {
               ic_input <- reactive({
                 switch(input$ic_method,
                        "Profile" = prof_ic,
-                       "Bootstrap" = function(xp, t0, t1, y_fit, ci_p=0.95)boot_ic(xp, t0, t1, y_fit, ci_p=ci_p ,under_threshold=TRUE)
+                       "Bootstrap" = boot_ic 
                        )
               })
               
@@ -97,7 +97,10 @@ shinyServer(function(input, output) {
                 input$b3
                 isolate({
                   ydat <- read_data()
-                  ic_func <- ic_input()
+                  if( input$ic_method == "Bootstrap" & input$fit_method == "GPD")
+                    ic_func <- function(xp, t0, t1, y_fit, ci_p=0.95) ic_input()(xp, t0, t1, y_fit, ci_p=ci_p ,under_threshold=TRUE)
+                  else 
+                    ic_func <- ic_input()
                   y_fit <- fit_input()(ydat)
                   log <- capture.output({
                     ic_fit <- ic_func(xp=input$xp, t0=input$t0t1[1], t1=input$t0t1[2], y_fit=y_fit)
