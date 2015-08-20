@@ -1,8 +1,10 @@
 library(shiny)
 shinyUI(
         pageWithSidebar(
-                        headerPanel("CSV Viewer"),
+                        headerPanel("FAR Analysis"),
                         sidebarPanel(
+                                     #                                      conditionalPanel(
+                                     #                                                       "$('li.active a').first().html()==='Data'",
                                                       fileInput('file1', 'Choose CSV File',
                                                                 accept=c('text/csv', 'text/comma-separated-values,text/plain', '.csv')),
                                                       checkboxInput('header', 'Header', TRUE),
@@ -18,17 +20,36 @@ shinyUI(
                                                                      'Single Quote'="'"),
                                                                    'Double Quote'),
                                                       numericInput("obs", "Number of observations to view:", 10),
+                                                      #                                                       ),
+                                                      #                                      conditionalPanel(
+                                                      #                                                       "$('li.active a').first().html()==='Model Fit'",
+                                                      selectInput("fit_method", "Choose a fitting method:", 
+                                                                         choices = c("Gaussian", "GEV", "GPD")),
+                                                      uiOutput("threshold"),
                                                       br(),
-                                                      uiOutput("select_method"),
-                                                      br(),
+                                                      actionButton("b2", "Fit Model"),
+                                                      #                                                       ),
+                                                      #                                      conditionalPanel(
+                                                      #                                                       "$('li.active a').first().html()==='FAR Estimation'",
                                                       uiOutput("select_ic")
+                                                      #                                                       )
                                      ),
                         mainPanel(
-                                  verbatimTextOutput("summary"),
-                                  tableOutput("contents"),
-                                  plotOutput("fit_plot"),
-                                  verbatimTextOutput("compute_ic")
-                                  )
+                                  #                                   tabsetPanel(
+                                  #                                               tabPanel("Data", 
+                                                       verbatimTextOutput("summary"), 
+                                                       tableOutput("contents"),
+                                                       #                                                        ),
+                                                       #                                               tabPanel("Model Fit", 
+                                                       plotOutput("data_plot1"),
+                                                       plotOutput("fit_plot"),
+                                                       #                                                        ),
+                                                       #                                               tabPanel("FAR Estimation", 
+                                                       plotOutput("data_plot2"),
+                                                       verbatimTextOutput("compute_ic")
+                                                       )
+                        #                                               )
+                        #                                   )
                         )
         )
-
+                                                                    
