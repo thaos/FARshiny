@@ -138,8 +138,7 @@ shinyServer(function(input, output) {
                 }
                 if(!is.null(input$ic_method)) {
                   if(!is.null(input$ic_method)) {
-                    print("j'suis")
-                    abline(h=input$xp, col="blue", lwd=2)
+                    tabline(h=input$xp, col="blue", lwd=2)
                     abline(v=input$t0t1[1], col="blue", lwd=2)
                     abline(v=input$t0t1[2], col="blue", lwd=2)
                   }
