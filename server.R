@@ -2,7 +2,7 @@ library(shiny)
 library(devtools)
 library(quantreg)
 library(alabama)
-devtools::load_all("FARg")
+devtools::load_all("../FARg")
 
 shinyServer(function(input, output) {
               values <- reactiveValues(stage=0)
