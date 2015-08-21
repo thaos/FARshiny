@@ -29,7 +29,7 @@ shinyUI(
                                      conditionalPanel(condition="$('html').hasClass('shiny-busy')",
                                                                                   tags$div("Loading...",id="loadmessage"))
                                      ),
-                        mainPanel(
+                        mainPanel(align="center",
                                   uiOutput("results"),
                                   uiOutput("print_data"),
                                   plotOutput("data_plot1"),

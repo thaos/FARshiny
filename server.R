@@ -44,7 +44,7 @@ shinyServer(function(input, output) {
               })
 
               output$print_data <- renderUI({
-                if(values$stage > 1) return()
+                if(values$stage != 1) return()
                 list(
                      verbatimTextOutput("summary"), 
                      tableOutput("contents")
@@ -122,7 +122,7 @@ shinyServer(function(input, output) {
               })
 
               output$summary <- renderPrint({
-                if(is.null(input$file1)) return()
+                if(is.null(input$file1)) return(invisible())
                 summary(read_data())
               })
 
@@ -138,7 +138,7 @@ shinyServer(function(input, output) {
                 }
                 if(!is.null(input$ic_method)) {
                   if(!is.null(input$ic_method)) {
-                    tabline(h=input$xp, col="blue", lwd=2)
+                    abline(h=input$xp, col="blue", lwd=2)
                     abline(v=input$t0t1[1], col="blue", lwd=2)
                     abline(v=input$t0t1[2], col="blue", lwd=2)
                   }
@@ -185,8 +185,8 @@ shinyServer(function(input, output) {
               })
 
               output$compute_ic <- renderPrint({
-                if(is.null(input$b3))return()
-                if(input$b3 == 0) return()
+                if(is.null(input$b3))return(invisible())
+                if(input$b3 == 0) return(invisible())
                 input$b3
                 isolate({
                   ydat <- read_data()
