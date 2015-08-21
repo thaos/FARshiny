@@ -90,6 +90,8 @@ shinyServer(function(input, output) {
               })
 
               output$select_ic <- renderUI({
+                input$b2
+                isolate({
                 if(values$stage>= 3){
                   ydat <- read_data()
                   y_fit <- fit_input()(ydat)
@@ -101,6 +103,7 @@ shinyServer(function(input, output) {
                        actionButton("b3", "Compute FAR")
                        )
                 }
+                })
               })
 
               read_data <- reactive({
