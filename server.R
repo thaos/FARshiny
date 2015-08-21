@@ -4,9 +4,56 @@ library(quantreg)
 devtools::load_all("../FARg")
 
 shinyServer(function(input, output) {
+              values <- reactiveValues(stage=0)
+
+              observe ({
+                if(is.null(input$file1)) return()
+                isolate({values$stage  <- 1})
+              })
+
+              observe({
+                if(is.null(input$b1) || input$b1 == 0)
+                  return()
+                values$stage  <- 2
+              })
+
+              observe({
+                if(is.null(input$b2) || input$b2 == 0)
+                  return()
+                values$stage  <- 3
+              })
+
+              output$print_data <- renderUI({
+                                             if(values$stage > 1) return()
+                                             list(
+                                                  verbatimTextOutput("summary"), 
+                                                  tableOutput("contents")
+                                                  )
+              })
+
+             output$data_options <- renderUI({
+                                             if(values$stage > 1) return()
+                                             list(
+                                                  checkboxInput('header', 'Header', TRUE),
+                                                  radioButtons('sep', 'Separator',
+                                                               c(Comma=',',
+                                                                 Semicolon=';',
+                                                                 Space=" ",
+                                                                 Tab='\t'),
+                                                               'Comma'),
+                                                  radioButtons('quote', 'Quote',
+                                                               c(None='',
+                                                                 'Double Quote'='"',
+                                                                 'Single Quote'="'"),
+                                                               'Double Quote'),
+                                                  numericInput("obs", "Number of observations to view:", 10)
+                                                  )
+             })
 
               read_data <- reactive({
                   inFile <- input$file1
+                  ("stage 1")
+                  isolate(values$stage  <- 1)
                   if (is.null(inFile))
                     return()
                   cat("Loading Data \n")
@@ -19,12 +66,12 @@ shinyServer(function(input, output) {
 
               output$b1 <- renderUI({
                 if(!data_loaded()) return()
-                actionButton("b1", "Plot Data")
+                if(values$stage > 1) return()
+                actionButton("b1", "OK - Next Step")
               })
 
               output$fit_buttons <- renderUI({
-                if(is.null(input$b1)) return()
-                if(input$b1 == 0) return()
+                if(values$stage >= 2)
                 list(
                      selectInput("fit_method", "Choose a fitting method:", 
                             choices = c("Gaussian", "GEV", "GPD")),
@@ -33,6 +80,7 @@ shinyServer(function(input, output) {
                      actionButton("b2", "Fit Model")
                      )
               })
+
               output$threshold <- renderUI({
                 if(is.null(input$fit_method)) return()
                 if(input$fit_method == "GPD"){
@@ -54,8 +102,7 @@ shinyServer(function(input, output) {
               })
 
               plot_data <- reactive({
-                if(is.null(input$b1)) return()
-                if(input$b1 == 0) return()
+                if(values$stage>= 2)
                 ydat <- read_data()
                 ydat <- ydat[order(ydat$year),]
                 plot(ydat$year, ydat$y, ylab="y", xlab="years")
@@ -91,18 +138,21 @@ shinyServer(function(input, output) {
               })
 
               fit_model  <- reactive({
-                print("fitting model")
-                fit_input()(read_data())
+                input$b2
+                isolate({
+                  print("fitting model")
+                  if(is.null(input$b2)) return()
+                  if(input$b2 == 0) return()
+                  fit_input()(read_data())
+                })
               })
               # 
               output$fit_plot <- renderPlot({
                 print("plotting fitted model")
-                input$b2
-                isolate({plot(fit_model())})
-              })
+                plot(fit_model())
+              }, width=900, height=600)
               output$select_ic <- renderUI({
-                if(is.null(input$b2)) return()
-                if(input$b2 == 0) return()
+                if(values$stage>= 3)
                 ydat <- read_data()
                 y_fit <- fit_input()(ydat)
                 list(
