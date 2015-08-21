@@ -1,35 +1,40 @@
 library(shiny)
 shinyUI(
         pageWithSidebar(
-                        headerPanel("CSV Viewer"),
+                        headerPanel("FAR Analysis"),
                         sidebarPanel(
-                                                      fileInput('file1', 'Choose CSV File',
-                                                                accept=c('text/csv', 'text/comma-separated-values,text/plain', '.csv')),
-                                                      checkboxInput('header', 'Header', TRUE),
-                                                      radioButtons('sep', 'Separator',
-                                                                   c(Comma=',',
-                                                                     Semicolon=';',
-                                                                     Space=" ",
-                                                                     Tab='\t'),
-                                                                   'Comma'),
-                                                      radioButtons('quote', 'Quote',
-                                                                   c(None='',
-                                                                     'Double Quote'='"',
-                                                                     'Single Quote'="'"),
-                                                                   'Double Quote'),
-                                                      numericInput("obs", "Number of observations to view:", 10),
-                                                    br(),
-                            uiOutput("plot_button"),
-                                                      br(),
-                                                      shiny::uiOutput("select_method"),
-                                                      br(),
-                                                      shiny::uiOutput("select_ic")
+                                     tags$head(tags$style(type="text/css", "
+                                                          #loadmessage {
+                                                          position: fixed;
+                                                          top: 0px;
+                                                          left: 0px;
+                                                          width: 100%;
+                                                          padding: 5px 0px 5px 0px;
+                                                          text-align: center;
+                                                          font-weight: bold;
+                                                          font-size: 100%;
+                                                          color: #000000;
+                                                          background-color: #CCFF66;
+                                                          z-index: 105;
+}
+")),
+                                     fileInput('file1', 'Choose CSV File',
+                                               accept=c('text/csv', 'text/comma-separated-values,text/plain', '.csv')),
+                                     uiOutput("data_options"),
+                                     uiOutput("b1"),
+                                     br(),
+                                     uiOutput("fit_buttons"),
+                                     br(),
+                                     uiOutput("select_ic"),
+                                     conditionalPanel(condition="$('html').hasClass('shiny-busy')",
+                                                                                  tags$div("Loading...",id="loadmessage"))
                                      ),
-                        mainPanel(
-                                  verbatimTextOutput("summary"),
-                                  tableOutput("contents"),
+                        mainPanel(align="center",
+                                  uiOutput("results"),
+                                  uiOutput("print_data"),
+                                  plotOutput("data_plot1"),
                                   plotOutput("fit_plot"),
-                                  verbatimTextOutput("compute_ic")
+                                  plotOutput("data_plot2")
                                   )
                         )
         )
