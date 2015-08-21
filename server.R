@@ -67,6 +67,8 @@ shinyServer(function(input, output) {
               })
 
               output$fit_buttons <- renderUI({
+                input$b1
+                isolate({
                 if(values$stage >= 2)
                   list(
                        selectInput("fit_method", "Choose a fitting method:",
@@ -74,7 +76,8 @@ shinyServer(function(input, output) {
                        uiOutput("threshold"),
                        br(),
                        actionButton("b2", "Fit Model")
-                       )
+                      )
+                })
               })
 
               output$threshold <- renderUI({
