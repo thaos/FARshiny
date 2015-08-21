@@ -68,6 +68,7 @@ shinyServer(function(input, output) {
 
               output$fit_buttons <- renderUI({
                 input$b1
+                input$file1
                 isolate({
                 if(values$stage >= 2)
                   list(
@@ -91,6 +92,7 @@ shinyServer(function(input, output) {
 
               output$select_ic <- renderUI({
                 input$b2
+                input$file1
                 isolate({
                 if(values$stage>= 3){
                   ydat <- read_data()
