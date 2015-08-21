@@ -1,7 +1,8 @@
 library(shiny)
 library(devtools)
 library(quantreg)
-devtools::load_all("../FARg")
+library(alabama)
+devtools::load_all("FARg")
 
 shinyServer(function(input, output) {
               values <- reactiveValues(stage=0)
@@ -20,7 +21,8 @@ shinyServer(function(input, output) {
               observe({
                 if(is.null(input$b2) || input$b2 == 0)
                   return()
-                values$stage  <- 3
+                if(!is.null(input$b1) || input$b1 >= 0)
+                  values$stage  <- 3
               })
 
               # UI according to the step we are on
@@ -46,7 +48,7 @@ shinyServer(function(input, output) {
               output$print_data <- renderUI({
                 if(values$stage != 1) return()
                 list(
-                     verbatimTextOutput("summary"), 
+                     verbatimTextOutput("summary"),
                      tableOutput("contents")
                      )
               })
@@ -58,7 +60,7 @@ shinyServer(function(input, output) {
               })
 
               output$results <- renderUI({
-                if(values$stage > 2) 
+                if(values$stage > 2)
                 list(
                      verbatimTextOutput("compute_ic")
                      )
@@ -67,7 +69,7 @@ shinyServer(function(input, output) {
               output$fit_buttons <- renderUI({
                 if(values$stage >= 2)
                   list(
-                       selectInput("fit_method", "Choose a fitting method:", 
+                       selectInput("fit_method", "Choose a fitting method:",
                                    choices = c("Gaussian", "GEV", "GPD")),
                        uiOutput("threshold"),
                        br(),
@@ -113,9 +115,9 @@ shinyServer(function(input, output) {
 
 
               output$contents <- renderTable({
-                # input$file1 will be NULL initially. After the user selects and uploads a 
-                # file, it will be a data frame with 'name', 'size', 'type', and 'datapath' 
-                # columns. The 'datapath' column will contain the local filenames where the 
+                # input$file1 will be NULL initially. After the user selects and uploads a
+                # file, it will be a data frame with 'name', 'size', 'type', and 'datapath'
+                # columns. The 'datapath' column will contain the local filenames where the
                 # data can be found.
                 if(is.null(input$file1)) return()
                 head(read_data(), n = input$obs)
@@ -168,11 +170,14 @@ shinyServer(function(input, output) {
                   fit_input()(read_data())
                 })
               })
-              # 
+              #
               output$fit_plot <- renderPlot({
                 print("plotting fitted model")
+                print(paste("stage", values$stage))
+                print(paste("b2", input$b2))
                 if(is.null(input$b2)) return()
-                if(input$b2 == 0) return()
+                if(values$stage < 2) return()
+                if(input$b2 == 0 && values$stage < 3) return()
                 plot(fit_model())
               }, width=900, height=600)
 
@@ -180,7 +185,7 @@ shinyServer(function(input, output) {
               ic_input <- reactive({
                 switch(input$ic_method,
                        "Profile" = prof_ic,
-                       "Bootstrap" = boot_ic 
+                       "Bootstrap" = boot_ic
                        )
               })
 
@@ -192,7 +197,7 @@ shinyServer(function(input, output) {
                   ydat <- read_data()
                   if( input$ic_method == "Bootstrap" & input$fit_method == "GPD")
                     ic_func <- function(xp, t0, t1, y_fit, ci_p=0.95) ic_input()(xp, t0, t1, y_fit, ci_p=ci_p ,under_threshold=TRUE)
-                  else 
+                  else
                     ic_func <- ic_input()
                   y_fit <- fit_input()(ydat)
                   log <- capture.output({
@@ -201,7 +206,7 @@ shinyServer(function(input, output) {
                   return(ic_fit)
                 })
               })
-              # 
+              #
 
 })
 
