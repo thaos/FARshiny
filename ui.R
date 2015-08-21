@@ -18,10 +18,12 @@ shinyUI(
                                                                      'Single Quote'="'"),
                                                                    'Double Quote'),
                                                       numericInput("obs", "Number of observations to view:", 10),
+                                                    br(),
+                            uiOutput("plot_button"),
                                                       br(),
-                                                      uiOutput("select_method"),
+                                                      shiny::uiOutput("select_method"),
                                                       br(),
-                                                      uiOutput("select_ic")
+                                                      shiny::uiOutput("select_ic")
                                      ),
                         mainPanel(
                                   verbatimTextOutput("summary"),

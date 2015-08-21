@@ -1,6 +1,7 @@
 library(shiny)
 library(devtools)
-devtools::load_all("../FARg")
+library(alabama)
+devtools::load_all("FARg")
 
 shinyServer(function(input, output) {
 
@@ -24,9 +25,9 @@ shinyServer(function(input, output) {
               })
 
               output$contents <- renderTable({
-                # input$file1 will be NULL initially. After the user selects and uploads a 
-                # file, it will be a data frame with 'name', 'size', 'type', and 'datapath' 
-                # columns. The 'datapath' column will contain the local filenames where the 
+                # input$file1 will be NULL initially. After the user selects and uploads a
+                # file, it will be a data frame with 'name', 'size', 'type', and 'datapath'
+                # columns. The 'datapath' column will contain the local filenames where the
                 # data can be found.
                 head(read_data(), n = input$obs)
               })
@@ -34,19 +35,35 @@ shinyServer(function(input, output) {
               output$summary <- renderPrint({
                 summary(read_data())
               })
-              
+
               output$fit_plot <- renderPlot({
                 if(is.null(input$b2))return()
                 if(input$b2 == 0) return()
                 input$b2
-                isolate(plot(fit_input()(read_data())))
+			isolate({
+				y_fit = fit_input()(read_data())
+				cat(class(y_fit))
+			})
+			#cat(str(y_fit))
+			#print(plot.gauss_fit)
+                isolate(plot(y_fit))
               })
 
-              output$select_method <- renderUI({
+              output$plot_button<- renderUI({
                 if(is.null(read_data())) return()
-                list(selectInput("fit_method", "Choose a fitting method:", 
+                  list(
+                    br(),
+                    actionButton("b1", "Plot Data")
+                      )
+              })
+
+
+              output$select_method <- renderUI({
+                if(is.null(input$b1)) return()
+                if(input$b1 == 0) return()
+                list(selectInput("fit_method", "Choose a fitting method:",
                                  choices = c("Gaussian", "GEV", "GPD")),
-                     uiOutput("threshold"),
+                     shiny::uiOutput("threshold"),
                      br(),
                      actionButton("b2", "Fit Model")
                      )
@@ -87,10 +104,10 @@ shinyServer(function(input, output) {
               ic_input <- reactive({
                 switch(input$ic_method,
                        "Profile" = prof_ic,
-                       "Bootstrap" = boot_ic 
+                       "Bootstrap" = boot_ic
                        )
               })
-              
+
               output$compute_ic <- renderPrint({
                 if(is.null(input$b3))return()
                 if(input$b3 == 0) return()
@@ -99,7 +116,7 @@ shinyServer(function(input, output) {
                   ydat <- read_data()
                   if( input$ic_method == "Bootstrap" & input$fit_method == "GPD")
                     ic_func <- function(xp, t0, t1, y_fit, ci_p=0.95) ic_input()(xp, t0, t1, y_fit, ci_p=ci_p ,under_threshold=TRUE)
-                  else 
+                  else
                     ic_func <- ic_input()
                   y_fit <- fit_input()(ydat)
                   log <- capture.output({
